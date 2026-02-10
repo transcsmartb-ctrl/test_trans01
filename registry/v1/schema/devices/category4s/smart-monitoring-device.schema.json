@@ -1,1 +1,166 @@
 
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Smart Monitoring Device API",
+    "description": "API for submitting smart-monitoring-device data",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://your-domain.com/api/v1"
+    }
+  ],
+  "paths": {
+    "/devices": {
+      "post": {
+        "summary": "Submit smart monitoring devices data",
+        "description": "POST an array of smart-monitoring-device objects",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/SmartMonitoringDevice"
+                }
+              },
+              "example": [
+                {
+                  "category4S": "smart-monitoring-device",
+                  "siteId": "1693279120646",
+                  "supplierId": "438",
+                  "pushAt": "2025-01-06T14:40:16+08:00",
+                  "deviceProperties": {
+                    "deviceSn": "SN-8655078237",
+                    "deviceName": "watch 001"
+                  },
+                  "worker": {
+                    "workerId": "30054722",
+                    "workerName": "tom",
+                    "phone": "65460363"
+                  },
+                  "additionalProperties": {
+                    "cicSiteId": 438493849,
+                    "remark": "this is a smart watch"
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SmartMonitoringDevice": {
+        "type": "object",
+        "required": [
+          "category4S",
+          "siteId",
+          "supplierId",
+          "pushAt",
+          "deviceProperties",
+          "worker"
+        ],
+        "properties": {
+          "category4S": {
+            "type": "string",
+            "enum": ["smart-monitoring-device"],
+            "description": "Category 4S Type code for the device"
+          },
+          "siteId": {
+            "type": "string",
+            "description": "A unique Site ID defined by solution vendor"
+          },
+          "supplierId": {
+            "type": "string",
+            "description": "A unique ID indicate the device’s supplier"
+          },
+          "pushAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Means the data push time (ISO 8601)"
+          },
+          "deviceProperties": {
+            "type": "object",
+            "required": [
+              "deviceSn",
+              "deviceName"
+            ],
+            "properties": {
+              "deviceSn": {
+                "type": "string",
+                "description": "Serial number of the device by solution vendor (e.g., SN123456)"
+              },
+              "deviceName": {
+                "type": "string",
+                "description": "Name of the device (e.g., Site Monitor 1)"
+              }
+            }
+          },
+          "worker": {
+            "type": "object",
+            "required": [
+              "workerId",
+              "workerName",
+              "phone"
+            ],
+            "properties": {
+              "workerId": {
+                "type": "string",
+                "description": "ID of the worker (e.g., W123)"
+              },
+              "workerName": {
+                "type": "string",
+                "description": "Name of the worker (e.g., John Doe)"
+              },
+              "phone": {
+                "type": "string",
+                "description": "Worker’s contact number (e.g., 5555-7890)"
+              }
+            }
+          },
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "cicSiteId": {
+                "type": "integer",
+                "format": "int64",
+                "minimum": 0,
+                "description": "A unique site ID provided by CIC"
+              },
+              "remark": {
+                "type": "string",
+                "description": "Additional notes about the smart monitoring device (e.g., In use)"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
