@@ -1,1 +1,88 @@
-
+json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ZoneInfoListResponse",
+  "description": "Response schema for CMP-002 Query the list of regional/zone information in a site API from the CIC SSSS API Framework Baseline [file:1]",
+  "type": "object",
+  "properties": {
+    "code": {
+      "type": "integer",
+      "description": "Response code, 10000 for success (see Appendix K) [file:1]",
+      "example": 10000
+    },
+    "msg": {
+      "type": "string",
+      "description": "Response message [file:1]",
+      "example": "success"
+    },
+    "data": {
+      "type": "object",
+      "properties": {
+        "totalCount": {
+          "type": "integer",
+          "description": "Total number of items [file:1]",
+          "example": 215
+        },
+        "pageNum": {
+          "type": "integer",
+          "description": "Page number [file:1]",
+          "example": 1
+        },
+        "pageSize": {
+          "type": "integer",
+          "description": "Number of items per page [file:1]",
+          "example": 10
+        },
+        "list": {
+          "type": "array",
+          "description": "List of zones, sorted descending by createTime [file:1]",
+          "items": {
+            "type": "object",
+            "properties": {
+              "zoneId": {
+                "type": "string",
+                "description": "Sites zone-specific ID [file:1]",
+                "example": "13244545237"
+              },
+              "zoneName": {
+                "type": "string",
+                "description": "Zone name [file:1]",
+                "example": "zone 1"
+              },
+              "siteId": {
+                "type": "string",
+                "description": "Associated Site ID [file:1]",
+                "example": "868655077658237"
+              },
+              "cicSiteId": {
+                "type": "integer",
+                "description": "Unique site ID provided by CIC [file:1]",
+                "example": 8085094854
+              },
+              "enableStatus": {
+                "type": "boolean",
+                "description": "Enable status [file:1]",
+                "example": true
+              },
+              "createTime": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Create time ISO 8601 [file:1]",
+                "example": "2025-01-01T10:00:00+08:00"
+              },
+              "updateTime": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Last update time ISO 8601 [file:1]",
+                "example": "2025-01-01T10:00:00+08:00"
+              }
+            },
+            "required": ["zoneId", "siteId"]
+          }
+        }
+      },
+      "required": ["totalCount", "pageNum", "pageSize", "list"]
+    }
+  },
+  "required": ["code", "msg", "data"]
+}
