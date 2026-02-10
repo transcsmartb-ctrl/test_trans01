@@ -1,1 +1,134 @@
-
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "OrgInfoListResponse",
+  "description": "Response schema for CMP-001 Query the list of site information API from the CIC SSSS API Framework Baseline [file:1]",
+  "type": "object",
+  "properties": {
+    "code": {
+      "type": "integer",
+      "description": "Response code, 10000 for success (see Appendix K) [file:1]",
+      "example": 10000
+    },
+    "msg": {
+      "type": "string",
+      "description": "Response message [file:1]",
+      "example": "success"
+    },
+    "data": {
+      "type": "object",
+      "properties": {
+        "totalCount": {
+          "type": "integer",
+          "description": "Total number of items [file:1]",
+          "example": 215
+        },
+        "pageNum": {
+          "type": "integer",
+          "description": "Page number [file:1]",
+          "example": 1
+        },
+        "pageSize": {
+          "type": "integer",
+          "description": "Number of items per page [file:1]",
+          "example": 10
+        },
+        "list": {
+          "type": "array",
+          "description": "List of sites, sorted descending by createTime [file:1]",
+          "items": {
+            "type": "object",
+            "properties": {
+              "siteId": {
+                "type": "string",
+                "description": "Unique Site ID defined by solution vendor [file:1]",
+                "example": "868655077658238"
+              },
+              "cicSiteId": {
+                "type": "integer",
+                "description": "Unique site ID provided by CIC [file:1]",
+                "example": 58444354895
+              },
+              "fullName": {
+                "type": "string",
+                "description": "Full name of the site [file:1]",
+                "example": "Foundation Project of XXX Road"
+              },
+              "name": {
+                "type": "string",
+                "description": "Short name of the site [file:1]",
+                "example": "XXX Road"
+              },
+              "siteCode": {
+                "type": "string",
+                "description": "Display name of the siteId [file:1]",
+                "example": "BJY"
+              },
+              "region": {
+                "type": "integer",
+                "description": "Regions: 1-Mainland China, 2-Macao, 3-Hong Kong [file:1]",
+                "example": 3
+              },
+              "address": {
+                "type": "object",
+                "description": "Multilingual address of the site [file:1]",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "example": {
+                  "en-HK": "Pak Shing Kok Road, Tseung Kwan O, Hong Kong",
+                  "zh-HK": "...",
+                  "zh-CN": "..."
+                }
+              },
+              "coordinateSystem": {
+                "type": "string",
+                "description": "Coordinate system, e.g., WGS-84 [file:1]",
+                "example": "WGS-84"
+              },
+              "longitude": {
+                "type": "string",
+                "description": "Longitude [file:1]",
+                "example": "114.366421"
+              },
+              "latitude": {
+                "type": "string",
+                "description": "Latitude [file:1]",
+                "example": "22.711811"
+              },
+              "enableStatus": {
+                "type": "boolean",
+                "description": "Enable status [file:1]",
+                "example": true
+              },
+              "projectStatus": {
+                "type": "integer",
+                "description": "Project status: 1-Preparation, 2-Under construction, 3-Suspended, 4-Completed [file:1]",
+                "example": 2
+              },
+              "createTime": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Create time ISO 8601 [file:1]",
+                "example": "2025-01-01T10:00:00+08:00"
+              },
+              "updateTime": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Last update time ISO 8601 [file:1]",
+                "example": "2025-01-01T10:00:00+08:00"
+              },
+              "emergencyContact": {
+                "type": "string",
+                "description": "Emergency contact of the site [file:1]",
+                "example": "Chan Tai Man 9876 5432"
+              }
+            },
+            "required": ["siteId"]
+          }
+        }
+      },
+      "required": ["totalCount", "pageNum", "pageSize", "list"]
+    }
+  },
+  "required": ["code", "msg", "data"]
+}
