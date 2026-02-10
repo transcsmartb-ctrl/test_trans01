@@ -1,27 +1,8 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "MeasurementsPushOrQuery",
-  "description": "Base schema for IoT measurements from Measurement-001/002 APIs (section 6.1, Appendix D) [file:1]",
-  "type": "object",
-  "properties": {
-    "category4S": {
-      "type": "string",
-      "description": "4S category code (Appendix A) [file:1]",
-      "example": "smart-monitoring-device"
-    },
-    "siteId": {
-      "type": "string",
-      "description": "Unique Site ID [file:1]",
-      "example": "1693279120646"
-    },
-    "supplierId": {
-      "type": "string",
-      "description": "Supplier ID [file:1]",
-      "example": "438"
-    },
-    "deviceSn": {
-      "type": "string",
-      "description": "Device serial number [file:1]",
-      "example": "ac0003a0550"
-    },
-    "push
+  "code": 0,
+  "msg": "success",
+  "data": {
+    "list": [ /* array of category4S objects */ ],
+    "totalCount": 123
+  }
+}
