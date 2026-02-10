@@ -1,8 +1,4 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "description": "Entry points for the Construction Safety API JSON Schema registry.",
-  "registry": {
-    "current": "https://<your-domain>/registry/current/catalog.json",
-    "v1": "https://<your-domain>/registry/v1/catalog.json"
-  }
+  "latest": "/registry/v1",
+  "versions": ["v1"]
 }
