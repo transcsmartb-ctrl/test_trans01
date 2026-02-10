@@ -1,1 +1,181 @@
-
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "AI Monitoring Alerts API",
+    "description": "API for comprehensive AI vision-based safety alerts (17+ types)",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://your-domain.com/api/v1"
+    }
+  ],
+  "paths": {
+    "/alerts": {
+      "post": {
+        "summary": "Submit AI monitoring alerts",
+        "description": "POST computer vision detections (fatigued driving, PPE violations, etc.)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/AIMonitoringAlert"
+                }
+              },
+              "example": [
+                {
+                  "category4S": "ai-monitoring",
+                  "siteId": "1693279120646",
+                  "supplierId": "438",
+                  "deviceSn": "868655077658237",
+                  "pushAt": "2025-01-06T14:40:16+08:00",
+                  "alertProperties": {
+                    "alertId": "30284930284",
+                    "alertType": "fatigued-driving",
+                    "alertLevel": 0,
+                    "alertStatus": 0,
+                    "alertMessage": {
+                      "zh-CN": "疲劳驾驶",
+                      "zh-HK": "疲勞駕駛",
+                      "en-HK": "Fatigued driving"
+                    },
+                    "alertTime": "2025-01-06T14:40:16+08:00"
+                  },
+                  "additionalProperties": {
+                    "cicSiteId": 594958493849,
+                    "imageUrl": "https://xxxx.jpeg",
+                    "maskedImageUrl": "https://xxxx.jpeg",
+                    "confidenceScore": 80,
+                    "notifyRecipient": {
+                      "name": "Mike",
+                      "phone": "65460369"
+                    },
+                    "triggerPersonnel": {
+                      "id": "W1001",
+                      "name": "Iris"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "MultilingualMessage": {
+        "type": "object",
+        "properties": {
+          "zh-CN": { "type": "string" },
+          "zh-HK": { "type": "string" },
+          "en-HK": { "type": "string" }
+        },
+        "required": ["zh-CN", "zh-HK", "en-HK"]
+      },
+      "Person": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" }
+        },
+        "required": ["id", "name"]
+      },
+      "AIMonitoringAlert": {
+        "type": "object",
+        "required": [
+          "category4S",
+          "siteId",
+          "supplierId",
+          "deviceSn",
+          "pushAt",
+          "alertProperties"
+        ],
+        "properties": {
+          "category4S": {
+            "type": "string",
+            "enum": ["ai-monitoring"]
+          },
+          "siteId": { "type": "string" },
+          "supplierId": { "type": "string" },
+          "deviceSn": { "type": "string" },
+          "pushAt": { "type": "string", "format": "date-time" },
+          "alertProperties": {
+            "type": "object",
+            "required": [
+              "alertId",
+              "alertType",
+              "alertLevel",
+              "alertStatus",
+              "alertMessage",
+              "alertTime"
+            ],
+            "properties": {
+              "alertId": { "type": "string" },
+              "alertType": {
+                "type": "string",
+                "enum": [
+                  "fatigued-driving",
+                  "no-driver",
+                  "receiving-phone-calls",
+                  "smoking-behaviour",
+                  "distracted-driving",
+                  "not-wearing-safety-helmet",
+                  "not-wearing-reflective-vest",
+                  "open-flame",
+                  "open-smoke",
+                  "restricted-area",
+                  "mechanical-approach",
+                  "edge-dangerous-area",
+                  "lifting-area",
+                  "machinery-speeding",
+                  "not-wearing-safety-belt",
+                  "others"
+                ]
+              },
+              "alertLevel": { "type": "integer", "enum": [0,1,2] },
+              "alertStatus": { "type": "integer", "enum": [0,1,2,3,4,5,6,7] },
+              "alertMessage": { "$ref": "#/components/schemas/MultilingualMessage" },
+              "alertTime": { "type": "string", "format": "date-time" }
+            }
+          },
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "cicSiteId": { "type": "integer", "minimum": 0 },
+              "imageUrl": {
+                "type": "string",
+                "format": "uri",
+                "pattern": ".*\\.jpeg$"
+              },
+              "maskedImageUrl": {
+                "type": "string",
+                "format": "uri",
+                "pattern": ".*\\.jpeg$"
+              },
+              "confidenceScore": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100
+              },
+              "notifyRecipient": { "$ref": "#/components/schemas/Person" },
+              "triggerPersonnel": { "$ref": "#/components/schemas/Person" }
+            }
+          }
+        }
+      }
+    }
+  }
+}
