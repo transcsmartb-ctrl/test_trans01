@@ -1,1 +1,162 @@
-
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Scaffold Coupler Device API",
+    "description": "API for submitting scaffold-coupler data",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://your-domain.com/api/v1"
+    }
+  ],
+  "paths": {
+    "/devices": {
+      "post": {
+        "summary": "Submit scaffold coupler devices data",
+        "description": "POST an array of scaffold-coupler objects",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ScaffoldCouplerDevice"
+                }
+              },
+              "example": [
+                {
+                  "category4S": "scaffold-coupler",
+                  "siteId": "1693279120646",
+                  "supplierId": "438",
+                  "pushAt": "2025-01-06T14:40:16+08:00",
+                  "deviceProperties": {
+                    "deviceSn": "SN-8655078237",
+                    "deviceName": "scaffold-coupler 001",
+                    "expirationTime": "2025-01-06T14:40:16+08:00",
+                    "deviceType": 1,
+                    "direction": "south"
+                  },
+                  "additionalProperties": {
+                    "cicSiteId": 438493849,
+                    "remark": "this is a scaffold-coupler",
+                    "locationDesc": "the second floor"
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ScaffoldCouplerDevice": {
+        "type": "object",
+        "required": [
+          "category4S",
+          "siteId",
+          "supplierId",
+          "pushAt",
+          "deviceProperties"
+        ],
+        "properties": {
+          "category4S": {
+            "type": "string",
+            "enum": ["scaffold-coupler"],
+            "description": "Category 4S Type code for the device"
+          },
+          "siteId": {
+            "type": "string",
+            "description": "A unique Site ID defined by solution vendor as the key for corresponding site"
+          },
+          "supplierId": {
+            "type": "string",
+            "description": "A unique ID indicate the device's supplier"
+          },
+          "pushAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Means the data push time (ISO 8601)"
+          },
+          "deviceProperties": {
+            "type": "object",
+            "required": [
+              "deviceSn",
+              "deviceName",
+              "expirationTime",
+              "deviceType",
+              "direction"
+            ],
+            "properties": {
+              "deviceSn": {
+                "type": "string",
+                "description": "Serial number of the device by solution vendor (e.g., SN789012)"
+              },
+              "deviceName": {
+                "type": "string",
+                "description": "Name of the device (e.g., Scaffold Coupler 1)"
+              },
+              "expirationTime": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Timestamp of device expiration"
+              },
+              "deviceType": {
+                "type": "integer",
+                "enum": [1, 2, 3],
+                "description": "1=兩分, 2=七仔, 3=吊繩 (coupler types)"
+              },
+              "direction": {
+                "type": "string",
+                "description": "Direction of the device (e.g., North or East)"
+              }
+            }
+          },
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "cicSiteId": {
+                "type": "integer",
+                "format": "int64",
+                "minimum": 0,
+                "description": "A unique site ID provided by CIC"
+              },
+              "locationDesc": {
+                "type": "string",
+                "description": "Description of device location (e.g., North side scaffold)"
+              },
+              "remark": {
+                "type": "string",
+                "description": "Additional remarks about the coupler (e.g., In good condition)"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
