@@ -1,1 +1,177 @@
 
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Mobile Plant Operation Alerts API",
+    "description": "API for mobile-plant-operation proximity/collision alerts",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://your-domain.com/api/v1"
+    }
+  ],
+  "paths": {
+    "/alerts": {
+      "post": {
+        "summary": "Submit mobile-plant-operation alerts",
+        "description": "POST proximity warnings from all 8 directions + distance",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/MobilePlantAlert"
+                }
+              },
+              "example": [
+                {
+                  "category4S": "mobile-plant-operation",
+                  "siteId": "1693279120646",
+                  "supplierId": "438",
+                  "deviceSn": "868655077658237",
+                  "pushAt": "2025-01-06T14:40:16+08:00",
+                  "alertProperties": {
+                    "alertId": "30284930284",
+                    "alertType": "too-close-distance",
+                    "alertLevel": 0,
+                    "alertStatus": 0,
+                    "alertMessage": {
+                      "zh-CN": "距离过近警告",
+                      "zh-HK": "距離過近警告",
+                      "en-HK": "Too close distance warning"
+                    },
+                    "alertTime": "2025-01-06T14:40:16+08:00"
+                  },
+                  "additionalProperties": {
+                    "cicSiteId": 594958493849,
+                    "imageUrl": "https://xxxx.jpeg",
+                    "notifyRecipient": {
+                      "name": "Mike",
+                      "phone": "65460369"
+                    },
+                    "triggerPersonnel": {
+                      "id": "W1001",
+                      "name": "Iris"
+                    },
+                    "alertDistance": {
+                      "value": 0.1,
+                      "unit": "m"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "MultilingualMessage": {
+        "type": "object",
+        "properties": {
+          "zh-CN": { "type": "string" },
+          "zh-HK": { "type": "string" },
+          "en-HK": { "type": "string" }
+        },
+        "required": ["zh-CN", "zh-HK", "en-HK"]
+      },
+      "Person": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" }
+        },
+        "required": ["id", "name"]
+      },
+      "Distance": {
+        "type": "object",
+        "required": ["value", "unit"],
+        "properties": {
+          "value": { "type": "number" },
+          "unit": { "type": "string", "enum": ["m", "cm", "mm"] }
+        }
+      },
+      "MobilePlantAlert": {
+        "type": "object",
+        "required": [
+          "category4S",
+          "siteId",
+          "supplierId",
+          "deviceSn",
+          "pushAt",
+          "alertProperties"
+        ],
+        "properties": {
+          "category4S": {
+            "type": "string",
+            "enum": ["mobile-plant-operation"]
+          },
+          "siteId": { "type": "string" },
+          "supplierId": { "type": "string" },
+          "deviceSn": { "type": "string" },
+          "pushAt": { "type": "string", "format": "date-time" },
+          "alertProperties": {
+            "type": "object",
+            "required": [
+              "alertId",
+              "alertType",
+              "alertLevel",
+              "alertStatus",
+              "alertMessage",
+              "alertTime"
+            ],
+            "properties": {
+              "alertId": { "type": "string" },
+              "alertType": {
+                "type": "string",
+                "enum": [
+                  "too-close-distance",
+                  "directly-front-approach",
+                  "directly-behind-approach",
+                  "directly-right-approach",
+                  "directly-left-approach",
+                  "upper-right-approach",
+                  "lower-right-approach",
+                  "upper-left-approach",
+                  "lower-left-approach",
+                  "others"
+                ]
+              },
+              "alertLevel": { "type": "integer", "enum": [0,1,2] },
+              "alertStatus": { "type": "integer", "enum": [0,1,2,3,4,5,6,7] },
+              "alertMessage": { "$ref": "#/components/schemas/MultilingualMessage" },
+              "alertTime": { "type": "string", "format": "date-time" }
+            }
+          },
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "cicSiteId": { "type": "integer", "minimum": 0 },
+              "imageUrl": {
+                "type": "string",
+                "format": "uri",
+                "pattern": ".*\\.jpeg$"
+              },
+              "notifyRecipient": { "$ref": "#/components/schemas/Person" },
+              "triggerPersonnel": { "$ref": "#/components/schemas/Person" },
+              "alertDistance": { "$ref": "#/components/schemas/Distance" }
+            }
+          }
+        }
+      }
+    }
+  }
+}
