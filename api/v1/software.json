@@ -1,1 +1,8 @@
-
+{
+  "code": 0,
+  "msg": "success",
+  "data": {
+    "list": [ /* array of category4S objects */ ],
+    "totalCount": 123
+  }
+}
