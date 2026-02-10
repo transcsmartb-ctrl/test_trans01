@@ -1,1 +1,151 @@
 
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Lock-Key Alerts API",
+    "description": "API for IoT lock hardware failure/security alerts",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://your-domain.com/api/v1"
+    }
+  ],
+  "paths": {
+    "/alerts": {
+      "post": {
+        "summary": "Submit lock-key alerts",
+        "description": "POST lock hardware faults and security violations",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/LockKeyAlert"
+                }
+              },
+              "example": [
+                {
+                  "category4S": "lock-key",
+                  "siteId": "1693279120646",
+                  "supplierId": "438",
+                  "deviceSn": "868655077658237",
+                  "pushAt": "2025-01-06T14:40:16+08:00",
+                  "alertProperties": {
+                    "alertId": "30284930284",
+                    "alertType": "low-battery",
+                    "alertLevel": 0,
+                    "alertStatus": 0,
+                    "alertMessage": {
+                      "zh-CN": "低电量",
+                      "zh-HK": "低電量",
+                      "en-HK": "Low battery"
+                    },
+                    "alertTime": "2025-01-06T14:40:16+08:00"
+                  },
+                  "additionalProperties": {
+                    "cicSiteId": 594958493849,
+                    "notifyRecipient": {
+                      "name": "Mike",
+                      "phone": "65460369"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "MultilingualMessage": {
+        "type": "object",
+        "properties": {
+          "zh-CN": { "type": "string" },
+          "zh-HK": { "type": "string" },
+          "en-HK": { "type": "string" }
+        },
+        "required": ["zh-CN", "zh-HK", "en-HK"]
+      },
+      "Person": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" }
+        },
+        "required": ["id", "name"]
+      },
+      "LockKeyAlert": {
+        "type": "object",
+        "required": [
+          "category4S",
+          "siteId",
+          "supplierId",
+          "deviceSn",
+          "pushAt",
+          "alertProperties"
+        ],
+        "properties": {
+          "category4S": {
+            "type": "string",
+            "enum": ["lock-key"]
+          },
+          "siteId": { "type": "string" },
+          "supplierId": { "type": "string" },
+          "deviceSn": { "type": "string" },
+          "pushAt": { "type": "string", "format": "date-time" },
+          "alertProperties": {
+            "type": "object",
+            "required": [
+              "alertId",
+              "alertType",
+              "alertLevel",
+              "alertStatus",
+              "alertMessage",
+              "alertTime"
+            ],
+            "properties": {
+              "alertId": { "type": "string" },
+              "alertType": {
+                "type": "string",
+                "enum": [
+                  "low-battery",
+                  "unlock-for-long-time",
+                  "lock-damaged",
+                  "unlock-fail",
+                  "shell-damage",
+                  "open-main-unit",
+                  "motor-abnormality",
+                  "others"
+                ]
+              },
+              "alertLevel": { "type": "integer", "enum": [0,1,2] },
+              "alertStatus": { "type": "integer", "enum": [0,1,2,3,4,5,6,7] },
+              "alertMessage": { "$ref": "#/components/schemas/MultilingualMessage" },
+              "alertTime": { "type": "string", "format": "date-time" }
+            }
+          },
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "cicSiteId": { "type": "integer", "minimum": 0 },
+              "notifyRecipient": { "$ref": "#/components/schemas/Person" }
+            }
+          }
+        }
+      }
+    }
+  }
+}
