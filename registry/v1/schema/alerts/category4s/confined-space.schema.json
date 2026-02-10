@@ -1,1 +1,171 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Confined Space Alerts API",
+    "description": "API for gas sensor threshold violation alerts (13+ types)",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://your-domain.com/api/v1"
+    }
+  ],
+  "paths": {
+    "/alerts": {
+      "post": {
+        "summary": "Submit confined-space alerts",
+        "description": "POST gas concentration threshold violations",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ConfinedSpaceAlert"
+                }
+              },
+              "example": [
+                {
+                  "category4S": "confined-space",
+                  "siteId": "1693279120646",
+                  "supplierId": "438",
+                  "deviceSn": "868655077658237",
+                  "pushAt": "2025-01-06T14:40:16+08:00",
+                  "alertProperties": {
+                    "alertId": "30284930284",
+                    "alertType": "o2-alert",
+                    "alertLevel": 0,
+                    "alertStatus": 0,
+                    "alertMessage": {
+                      "zh-CN": "氧气警报",
+                      "zh-HK": "氧氣警報",
+                      "en-HK": "O2 Alert"
+                    },
+                    "alertTime": "2025-01-06T14:40:16+08:00",
+                    "alertNum": 50
+                  },
+                  "additionalProperties": {
+                    "cicSiteId": 594958493849,
+                    "notifyRecipient": {
+                      "name": "Mike",
+                      "phone": "65460369"
+                    },
+                    "thresholdMax": 30,
+                    "thresholdMin": 5,
+                    "workerId": "W1001",
+                    "bioStatus": true,
+                    "sosFlag": true
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "MultilingualMessage": {
+        "type": "object",
+        "properties": {
+          "zh-CN": { "type": "string" },
+          "zh-HK": { "type": "string" },
+          "en-HK": { "type": "string" }
+        },
+        "required": ["zh-CN", "zh-HK", "en-HK"]
+      },
+      "Person": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" }
+        },
+        "required": ["id", "name"]
+      },
+      "ConfinedSpaceAlert": {
+        "type": "object",
+        "required": [
+          "category4S",
+          "siteId",
+          "supplierId",
+          "deviceSn",
+          "pushAt",
+          "alertProperties"
+        ],
+        "properties": {
+          "category4S": {
+            "type": "string",
+            "enum": ["confined-space"]
+          },
+          "siteId": { "type": "string" },
+          "supplierId": { "type": "string" },
+          "deviceSn": { "type": "string" },
+          "pushAt": { "type": "string", "format": "date-time" },
+          "alertProperties": {
+            "type": "object",
+            "required": [
+              "alertId",
+              "alertType",
+              "alertLevel",
+              "alertStatus",
+              "alertMessage",
+              "alertTime",
+              "alertNum"
+            ],
+            "properties": {
+              "alertId": { "type": "string" },
+              "alertType": {
+                "type": "string",
+                "enum": [
+                  "humidity-alert",
+                  "temperature-alert",
+                  "co-alert",
+                  "co2-alert",
+                  "o2-alert",
+                  "hcho-alert",
+                  "tvoc-alert",
+                  "pm25-alert",
+                  "pm10-alert",
+                  "h2c-alert",
+                  "ch4-alert",
+                  "windSpeed-alert",
+                  "lel-alert",
+                  "illuminance-alert",
+                  "others"
+                ]
+            },
+              "alertLevel": { "type": "integer", "enum": [0,1,2] },
+              "alertStatus": { "type": "integer", "enum": [0,1,2,3,4,5,6,7] },
+              "alertMessage": { "$ref": "#/components/schemas/MultilingualMessage" },
+              "alertTime": { "type": "string", "format": "date-time" },
+              "alertNum": { "type": "number" }
+            }
+          },
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "cicSiteId": { "type": "integer", "minimum": 0 },
+              "thresholdMax": { "type": "number" },
+              "thresholdMin": { "type": "number" },
+              "notifyRecipient": { "$ref": "#/components/schemas/Person" },
+              "workerId": { "type": "string" },
+              "bioStatus": { "type": "boolean" },
+              "sosFlag": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    }
+  }
+}
 
