@@ -1,1 +1,96 @@
-\
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Media Token API (TOKEN-003)",
+    "description": "Generate short-lived token for alert media/live stream access - Solution Vendor only",
+    "version": "1.0.0"
+  },
+  "servers": [{ "url": "https://your-domain.com/api" }],
+  "paths": {
+    "/mediaToken": {
+      "post": {
+        "summary": "TOKEN-003: Get media token (15min expiry)",
+        "description": "Generate token for /alerts/media?, live streams (.m3u8), PDF files. CMP → Solution Vendor (Pull)",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MediaTokenRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Media token issued",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaTokenResponse"
+                }
+              }
+            }
+          },
+          "401": { "description": "Invalid access token" },
+          "429": { "description": "Rate limit (100 req/s)" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "MediaTokenRequest": {
+        "type": "object",
+        "properties": {
+          "urls": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri",
+              "description": "Media/stream URLs to authorize (?token=xxx usage)"
+            },
+            "minItems": 1,
+            "maxItems": 10,
+            "example": [
+              "https://storage.example.com/alerts/alert-001.mp4",
+              "https://live.example.com/stream.m3u8"
+            ]
+          }
+        },
+        "required": ["urls"]
+      },
+      "MediaTokenResponse": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "integer", "example": 10000 },
+          "msg": { "type": "string", "example": "success" },
+          "data": {
+            "type": "object",
+            "properties": {
+              "token": {
+                "type": "string",
+                "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                "description": "Query param token (15min TTL)"
+              },
+              "expiresIn": { "type": "integer", "example": 900 },
+              "urls": {
+                "type": "array",
+                "items": { "type": "string", "format": "uri" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
