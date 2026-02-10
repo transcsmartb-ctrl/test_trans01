@@ -1,1 +1,164 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Scaffold Coupler Measurements API",
+    "description": "API for submitting scaffold-coupler measurements",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://your-domain.com/api/v1"
+    }
+  ],
+  "paths": {
+    "/measurements": {
+      "post": {
+        "summary": "Submit scaffold-coupler measurements",
+        "description": "POST location/battery/onlineStatus for scaffold couplers",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ScaffoldCouplerMeasurement"
+                }
+              },
+              "example": [
+                {
+                  "category4S": "scaffold-coupler",
+                  "siteId": "1693279120646",
+                  "supplierId": "438",
+                  "deviceSn": "ac0003a0550",
+                  "pushAt": "2025-01-06T10:30:00+08:00",
+                  "measurements": [
+                    {
+                      "metricType": "location",
+                      "dataType": "object",
+                      "value": {
+                        "longitude": "137.4554",
+                        "latitude": "28.7887"
+                      },
+                      "unit": "{lat, long}",
+                      "observedAt": "2025-01-06T10:30:00+08:00"
+                    },
+                    {
+                      "metricType": "battery",
+                      "dataType": "number",
+                      "value": 90,
+                      "unit": "%",
+                      "observedAt": "2025-01-06T10:30:00+08:00"
+                    },
+                    {
+                      "metricType": "onlineStatus",
+                      "dataType": "boolean",
+                      "value": true,
+                      "unit": "",
+                      "observedAt": "2025-01-06T10:30:00+08:00"
+                    }
+                  ],
+                  "additionalProperties": {
+                    "cicSiteId": 438493849,
+                    "coordinateSystem": "WGS-84"
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Measurement": {
+        "type": "object",
+        "required": [
+          "metricType",
+          "dataType",
+          "value",
+          "unit",
+          "observedAt"
+        ],
+        "properties": {
+          "metricType": {
+            "type": "string",
+            "examples": ["location", "battery", "onlineStatus"]
+          },
+          "dataType": {
+            "type": "string",
+            "enum": ["string", "number", "integer", "boolean", "object"]
+          },
+          "value": {
+            "oneOf": [
+              { "type": "string" },
+              { "type": "number" },
+              { "type": "integer" },
+              { "type": "boolean" },
+              {
+                "type": "object",
+                "properties": {
+                  "longitude": { "type": "string" },
+                  "latitude": { "type": "string" }
+                },
+                "required": ["longitude", "latitude"]
+              }
+            ]
+          },
+          "unit": { "type": "string" },
+          "observedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "ScaffoldCouplerMeasurement": {
+        "type": "object",
+        "required": [
+          "category4S",
+          "siteId",
+          "supplierId",
+          "deviceSn",
+          "pushAt",
+          "measurements"
+        ],
+        "properties": {
+          "category4S": {
+            "type": "string",
+            "enum": ["scaffold-coupler"]
+          },
+          "siteId": { "type": "string" },
+          "supplierId": { "type": "string" },
+          "deviceSn": { "type": "string" },
+          "pushAt": { "type": "string", "format": "date-time" },
+          "measurements": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Measurement" },
+            "description": "Standard IoT: location, battery, onlineStatus"
+          },
+          "additionalMeasurements": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Measurement" }
+          },
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "cicSiteId": { "type": "integer", "minimum": 0 },
+              "coordinateSystem": {
+                "type": "string",
+                "enum": ["WGS-84", "HK1980"]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
 
