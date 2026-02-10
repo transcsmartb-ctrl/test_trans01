@@ -1,1 +1,100 @@
 
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "MEWP Alerts API (Updated)",
+    "description": "MEWP safety alerts: battery, obstacles, stop-at-top",
+    "version": "1.0.1"
+  },
+  "servers": [{ "url": "https://your-domain.com/api/v1" }],
+  "paths": {
+    "/alerts": {
+      "post": {
+        "summary": "Submit MEWP alerts",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/MewpAlert" }
+              },
+              "example": [
+                {
+                  "category4S": "mewp",
+                  "siteId": "1693279120646",
+                  "supplierId": "438",
+                  "deviceSn": "868655077658237",
+                  "pushAt": "2025-01-06T14:40:16+08:00",
+                  "alertProperties": {
+                    "alertId": "30284930284",
+                    "alertType": "low-battery",
+                    "alertLevel": 0,
+                    "alertStatus": 0,
+                    "alertMessage": {
+                      "zh-CN": "低电量",
+                      "zh-HK": "低電量",
+                      "en-HK": "Low battery"
+                    },
+                    "alertTime": "2025-01-06T14:40:16+08:00"
+                  },
+                  "additionalProperties": {
+                    "cicSiteId": 594958493849,
+                    "notifyRecipient": {
+                      "name": "Mike",
+                      "phone": "65460369"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "responses": { "200": { "description": "Success" } }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "MultilingualMessage": {
+        "type": "object",
+        "properties": { "zh-CN": { "type": "string" }, "zh-HK": { "type": "string" }, "en-HK": { "type": "string" } },
+        "required": ["zh-CN", "zh-HK", "en-HK"]
+      },
+      "Person": { "type": "object", "properties": { "id": { "type": "string" }, "name": { "type": "string" } }, "required": ["id", "name"] },
+      "MewpAlert": {
+        "type": "object",
+        "required": ["category4S", "siteId", "supplierId", "deviceSn", "pushAt", "alertProperties"],
+        "properties": {
+          "category4S": { "type": "string", "enum": ["mewp"] },
+          "siteId": { "type": "string" },
+          "supplierId": { "type": "string" },
+          "deviceSn": { "type": "string" },
+          "pushAt": { "type": "string", "format": "date-time" },
+          "alertProperties": {
+            "type": "object",
+            "required": ["alertId", "alertType", "alertLevel", "alertStatus", "alertMessage", "alertTime"],
+            "properties": {
+              "alertId": { "type": "string" },
+              "alertType": {
+                "type": "string",
+                "enum": ["low-battery", "obstacles", "stop-at-top", "others"]
+              },
+              "alertLevel": { "type": "integer", "enum": [0,1,2] },
+              "alertStatus": { "type": "integer", "enum": [0,1,2,3,4,5,6,7] },
+              "alertMessage": { "$ref": "#/components/schemas/MultilingualMessage" },
+              "alertTime": { "type": "string", "format": "date-time" }
+            }
+          },
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "cicSiteId": { "type": "integer", "minimum": 0 },
+              "notifyRecipient": { "$ref": "#/components/schemas/Person" }
+            }
+          }
+        }
+      }
+    }
+  }
+}
