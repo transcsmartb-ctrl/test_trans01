@@ -1,21 +1,32 @@
-
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "Tower Crane Measurements API",
-    "description": "API for submitting tower-crane measurements",
-    "version": "1.0.0"
+    "title": "CIC SSSS Measurement APIs - Tower Crane",
+    "description": "APIs for pushing/querying tower-crane measurements (Measurement-001/002). Crane telemetry: height, load, wind, zone safety. See Appendix D.[file:1]",
+    "version": "1.0.0",
+    "contact": {
+      "name": "CIC SSSS"
+    }
   },
   "servers": [
     {
-      "url": "https://your-domain.com/api/v1"
+      "url": "https://api.example.com/v1"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Measurements",
+      "description": "Continuous IoT measurement data push/query (CMP-hosted:001, Vendor-hosted:002).[file:1]"
     }
   ],
   "paths": {
     "/measurements": {
       "post": {
-        "summary": "Submit tower-crane measurements",
-        "description": "POST measurement data for tower-crane category4S",
+        "tags": ["Measurements"],
+        "summary": "Measurement-001 Push tower-crane measurements (CMP-hosted)",
+        "description": "Push continuous crane operational data (array format).[file:1]",
+        "operationId": "pushTowerCraneMeasurements",
+        "security": [{"bearerAuth": []}],
         "requestBody": {
           "required": true,
           "content": {
@@ -25,154 +36,253 @@
                 "items": {
                   "$ref": "#/components/schemas/TowerCraneMeasurement"
                 }
-              },
-              "example": [
-                {
-                  "category4S": "tower-crane",
-                  "siteId": "1693279120646",
-                  "supplierId": "438",
-                  "deviceSn": "ac0003a0550",
-                  "pushAt": "2025-01-06T10:30:00+08:00",
-                  "measurements": [
-                    {
-                      "metricType": "location",
-                      "dataType": "object",
-                      "value": {
-                        "longitude": "137.4554",
-                        "latitude": "28.7887"
-                      },
-                      "unit": "{lat, long}",
-                      "observedAt": "2025-01-06T10:30:00+08:00"
-                    },
-                    {
-                      "metricType": "onlineStatus",
-                      "dataType": "boolean",
-                      "value": true,
-                      "unit": "",
-                      "observedAt": "2025-01-06T10:30:00+08:00"
-                    }
-                  ],
-                  "additionalProperties": {
-                    "cicSiteId": 438493849,
-                    "zoneId": "4390490324",
-                    "coordinateSystem": "WGS-84"
-                  }
-                }
-              ]
+              }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccessResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["Measurements"],
+        "summary": "Measurement-002 Query tower-crane measurements (Solution Vendor-hosted)",
+        "description": "Paginated crane operational history.[file:1]",
+        "parameters": [
+          {
+            "name": "category4S",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": ["tower-crane"]
+            }
           },
-          "400": {
-            "description": "Bad Request"
+          {
+            "$ref": "#/components/parameters/siteId"
+          },
+          {
+            "$ref": "#/components/parameters/supplierId"
+          },
+          {
+            "$ref": "#/components/parameters/deviceSn"
+          },
+          {
+            "$ref": "#/components/parameters/startTime"
+          },
+          {
+            "$ref": "#/components/parameters/endTime"
+          },
+          {
+            "$ref": "#/components/parameters/pageNum"
+          },
+          {
+            "$ref": "#/components/parameters/pageSize"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeasurementListResponse"
+                }
+              }
+            }
           }
         }
       }
     }
   },
   "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
     "schemas": {
-      "Measurement": {
-        "type": "object",
-        "required": [
-          "metricType",
-          "dataType",
-          "value",
-          "unit",
-          "observedAt"
-        ],
-        "properties": {
-          "metricType": {
-            "type": "string"
-          },
-          "dataType": {
-            "type": "string",
-            "enum": ["string", "number", "integer", "boolean", "object"]
-          },
-          "value": {
-            "oneOf": [
-              { "type": "string" },
-              { "type": "number" },
-              { "type": "integer" },
-              { "type": "boolean" },
-              { 
-                "type": "object",
-                "properties": {
-                  "longitude": { "type": "string" },
-                  "latitude": { "type": "string" }
-                }
-              }
-            ]
-          },
-          "unit": {
-            "type": "string"
-          },
-          "observedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
       "TowerCraneMeasurement": {
         "type": "object",
-        "required": [
-          "category4S",
-          "siteId",
-          "supplierId",
-          "deviceSn",
-          "pushAt",
-          "measurements"
-        ],
+        "required": ["category4S", "siteId", "supplierId", "deviceSn", "pushAt", "measurements"],
         "properties": {
           "category4S": {
             "type": "string",
-            "enum": ["tower-crane"]
+            "const": "tower-crane",
+            "description": "Fixed category.[file:1]"
           },
           "siteId": {
-            "type": "string"
+            "type": "string",
+            "example": "1693279120646"
+          },
+          "cicSiteId": {
+            "type": "integer",
+            "example": 438493849
           },
           "supplierId": {
-            "type": "string"
+            "type": "string",
+            "example": "438"
           },
           "deviceSn": {
-            "type": "string"
+            "type": "string",
+            "example": "TC-001"
           },
           "pushAt": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "example": "2025-01-06T14:40:16+08:00"
           },
           "measurements": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/Measurement"
+              "$ref": "#/components/schemas/MeasurementItem"
             }
           },
           "additionalMeasurements": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/Measurement"
+              "$ref": "#/components/schemas/MeasurementItem"
             }
           },
           "additionalProperties": {
             "type": "object",
             "properties": {
-              "cicSiteId": {
-                "type": "integer",
-                "minimum": 0
-              },
               "zoneId": {
-                "type": "string"
+                "type": "string",
+                "example": "lifting-zone-1"
               },
               "coordinateSystem": {
                 "type": "string",
-                "enum": ["WGS-84", "HK1980"]
+                "example": "WGS-84"
+              },
+              "streamUrl": {
+                "type": "string",
+                "format": "uri"
               }
             }
           }
+        },
+        "description": "Tower crane operational measurement.[file:1]"
+      },
+      "MeasurementItem": {
+        "type": "object",
+        "required": ["metricType", "dataType", "value", "observedAt"],
+        "properties": {
+          "metricType": {
+            "type": "string",
+            "enum": ["liftingHeight", "loadWeight", "windSpeed", "moment", "radius", "angle", "ropeLength", "onlineStatus", "proximityAlert"],
+            "example": "liftingHeight"
+          },
+          "dataType": {
+            "type": "string",
+            "enum": ["number", "integer", "boolean"],
+            "example": "number"
+          },
+          "value": {
+            "oneOf": [
+              {"type": "number"},
+              {"type": "integer"},
+              {"type": "boolean"}
+            ],
+            "example": 45.2
+          },
+          "unit": {
+            "type": "string",
+            "example": "meters"
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-01-06T14:40:10+08:00"
+          },
+          "safeLimit": {
+            "type": "number",
+            "example": 50.0
+          },
+          "limitExceeded": {
+            "type": "boolean",
+            "example": false
+          }
         }
+      },
+      "ApiSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "code": {"type": "integer", "example": 10000},
+          "msg": {"type": "string", "example": "success"},
+          "data": {"type": "null"}
+        }
+      },
+      "MeasurementListResponse": {
+        "type": "object",
+        "properties": {
+          "code": {"type": "integer", "example": 10000},
+          "msg": {"type": "string", "example": "success"},
+          "data": {
+            "type": "object",
+            "properties": {
+              "list": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/TowerCraneMeasurement"
+                }
+              },
+              "totalCount": {"type": "integer"},
+              "pageNum": {"type": "integer"},
+              "pageSize": {"type": "integer"}
+            }
+          }
+        }
+      }
+    },
+    "parameters": {
+      "siteId": {
+        "name": "siteId",
+        "in": "query",
+        "required": true,
+        "schema": {"type": "string"}
+      },
+      "supplierId": {
+        "name": "supplierId",
+        "in": "query",
+        "required": true,
+        "schema": {"type": "string"}
+      },
+      "deviceSn": {
+        "name": "deviceSn",
+        "in": "query",
+        "schema": {"type": "string"}
+      },
+      "startTime": {
+        "name": "startTime",
+        "in": "query",
+        "schema": {"type": "string", "format": "date-time"}
+      },
+      "endTime": {
+        "name": "endTime",
+        "in": "query",
+        "schema": {"type": "string", "format": "date-time"}
+      },
+      "pageNum": {
+        "name": "pageNum",
+        "in": "query",
+        "schema": {"type": "integer", "default": 1}
+      },
+      "pageSize": {
+        "name": "pageSize",
+        "in": "query",
+        "schema": {"type": "integer", "default": 10, "maximum": 1000}
       }
     }
   }
