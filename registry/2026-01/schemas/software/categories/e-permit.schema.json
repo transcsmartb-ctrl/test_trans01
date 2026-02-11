@@ -1,0 +1,154 @@
+
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "E-Permit Software API",
+    "description": "API for submitting e-permit software data",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://your-domain.com/api/v1"
+    }
+  ],
+  "paths": {
+    "/software": {
+      "post": {
+        "summary": "Submit e-permit software data",
+        "description": "POST an array of e-permit objects",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Epermit"
+                }
+              },
+              "example": [
+                {
+                  "category4S": "e-permit",
+                  "siteId": "1693279120646",
+                  "supplierId": "438",
+                  "epermitProperties": {
+                    "epermitId": "8403438443",
+                    "epermitName": "xxx e-permit 1",
+                    "epermitUrl": "https://xxxxx.pdf",
+                    "epermitStatus": 1,
+                    "expirationTime": "2025-01-10T00:00:01+08:00",
+                    "createTime": "2025-05-16T09:00:01+08:00"
+                  },
+                  "additionalProperties": {
+                    "cicSiteId": 438493849
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Epermit": {
+        "type": "object",
+        "required": [
+          "category4S",
+          "siteId",
+          "supplierId",
+          "epermitProperties"
+        ],
+        "properties": {
+          "category4S": {
+            "type": "string",
+            "enum": ["e-permit"],
+            "description": "Category 4S Type code for the software"
+          },
+          "siteId": {
+            "type": "string",
+            "description": "A unique Site ID defined by solution vendor as the key for corresponding site"
+          },
+          "supplierId": {
+            "type": "string",
+            "description": "A unique ID indicate the supplier"
+          },
+          "epermitProperties": {
+            "type": "object",
+            "required": [
+              "epermitId",
+              "epermitName",
+              "epermitUrl",
+              "epermitStatus",
+              "expirationTime",
+              "createTime"
+            ],
+            "properties": {
+              "epermitId": {
+                "type": "string",
+                "description": "E-permit ID (e.g., E-Permit-001)"
+              },
+              "epermitName": {
+                "type": "string",
+                "description": "E-permit name (e.g., Hot Works Permit)"
+              },
+              "epermitUrl": {
+                "type": "string",
+                "format": "uri",
+                "description": "URL to the PDF file (e.g., http://example.com/permit.pdf)"
+              },
+              "epermitStatus": {
+                "type": "integer",
+                "enum": [1,2,3,4,5,6,7,8,9,10,11,12,13],
+                "description": "1=Applied,2=Under Approval,3=Effective,4=Cancelled,5=Expired,6=Draft,7=Pending,8=Approved,9=Rejected,10=In Revision,11=On Hold,12=Completed,13=Archived"
+              },
+              "expirationTime": {
+                "type": "string",
+                "format": "date-time",
+                "description": "The expiry date and time of the permit (ISO 8601)"
+              },
+              "createTime": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Creation date and time of the permit (ISO 8601)"
+              }
+            }
+          },
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "cicSiteId": {
+                "type": "integer",
+                "format": "int64",
+                "minimum": 0,
+                "description": "A unique site ID provided by CIC"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

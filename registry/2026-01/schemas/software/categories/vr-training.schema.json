@@ -1,0 +1,164 @@
+
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "VR Training Software API",
+    "description": "API for submitting vr-training software data",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://your-domain.com/api/v1"
+    }
+  ],
+  "paths": {
+    "/software": {
+      "post": {
+        "summary": "Submit VR training data",
+        "description": "POST an array of vr-training objects",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/VrTraining"
+                }
+              },
+              "example": [
+                {
+                  "category4S": "vr-training",
+                  "siteId": "1693279120646",
+                  "supplierId": "438",
+                  "trainingRecordProperties": {
+                    "trainingId": "P49348934",
+                    "trainingType": 2,
+                    "trainingName": "process 1",
+                    "disclosingParty": "roman",
+                    "disclosingRecipient": [
+                      "Jack",
+                      "Iris",
+                      "Micky"
+                    ],
+                    "createTime": "2025-05-16T09:00:01+08:00"
+                  },
+                  "additionalProperties": {
+                    "cicSiteId": 4338493849,
+                    "remark": "251132VH4578"
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "VrTraining": {
+        "type": "object",
+        "required": [
+          "category4S",
+          "siteId",
+          "supplierId",
+          "trainingRecordProperties"
+        ],
+        "properties": {
+          "category4S": {
+            "type": "string",
+            "enum": ["vr-training"],
+            "description": "Category 4S Type code for the software"
+          },
+          "siteId": {
+            "type": "string",
+            "description": "A unique Site ID defined by solution vendor"
+          },
+          "supplierId": {
+            "type": "string",
+            "description": "Unique supplier ID"
+          },
+          "trainingRecordProperties": {
+            "type": "object",
+            "required": [
+              "trainingId",
+              "trainingType",
+              "trainingName",
+              "disclosingParty",
+              "disclosingRecipient",
+              "createTime"
+            ],
+            "properties": {
+              "trainingId": {
+                "type": "string",
+                "description": "Training ID (e.g., vr-Training-001)"
+              },
+              "trainingType": {
+                "type": "integer",
+                "enum": [1,2,3,4,5,6,7],
+                "description": "1=Safety,2=Emergency,3=Operation,4=Technical,5=Quality,6=Site Awareness,7=Interpersonal"
+              },
+              "trainingName": {
+                "type": "string",
+                "description": "Name of training session"
+              },
+              "disclosingParty": {
+                "type": "string",
+                "description": "Training provider name"
+              },
+              "disclosingRecipient": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Array of recipient names"
+              },
+              "createTime": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Training record creation time (ISO 8601)"
+              }
+            }
+          },
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "cicSiteId": {
+                "type": "integer",
+                "format": "int64",
+                "minimum": 0,
+                "description": "CIC site ID"
+              },
+              "remark": {
+                "type": "string",
+                "description": "Additional remarks about VR training"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
