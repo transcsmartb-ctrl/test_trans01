@@ -1,51 +1,39 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "Mobile Plant Operation Device API",
-    "description": "API for submitting mobile-plant-operation data",
-    "version": "1.0.0"
+    "title": "CIC SSSS Device APIs - Mobile Plant Operation Device",
+    "description": "APIs for adding/updating/querying mobile-plant-operation device (e.g., excavators, machinery). From CIC SSSS API Framework v0.16 (Device-001/002/004). See Appendix B.[file:1]",
+    "version": "1.0.0",
+    "contact": {
+      "name": "CIC SSSS"
+    }
   },
   "servers": [
     {
-      "url": "https://your-domain.com/api/v1"
+      "url": "https://api.example.com/v1"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Devices",
+      "description": "IoT Device Management for 4S categories.[file:1]"
     }
   ],
   "paths": {
     "/devices": {
       "post": {
-        "summary": "Submit mobile plant operation devices data",
-        "description": "POST an array of mobile-plant-operation objects",
+        "tags": ["Devices"],
+        "summary": "Device-001 Add 4S IoT device data (CMP-hosted)",
+        "description": "Add new mobile-plant-operation device record.[file:1]",
+        "operationId": "addMobilePlantDevice",
+        "security": [{"bearerAuth": []}],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/MobilePlantOperationDevice"
-                }
-              },
-              "example": [
-                {
-                  "category4S": "mobile-plant-operation",
-                  "siteId": "1693279120646",
-                  "supplierId": "438",
-                  "pushAt": "2025-01-06T14:40:16+08:00",
-                  "deviceProperties": {
-                    "deviceSn": "SN-8655078237",
-                    "deviceName": "mobile-plant-operation 001"
-                  },
-                  "machineProperties": {
-                    "machineId": "139209320",
-                    "machineType": "182"
-                  },
-                  "additionalProperties": {
-                    "cicSiteId": 438493849,
-                    "remark": "this is a mobile-plant-operation",
-                    "streamUrl": "https://xxxx.flv"
-                  }
-                }
-              ]
+                "$ref": "#/components/schemas/MobilePlantDevice"
+              }
             }
           }
         },
@@ -55,106 +43,369 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string",
-                      "example": "success"
-                    }
-                  }
+                  "$ref": "#/components/schemas/ApiResponse"
                 }
               }
             }
           },
           "400": {
-            "description": "Bad Request"
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      },
+      "patch": {
+        "tags": ["Devices"],
+        "summary": "Device-002 Update 4S IoT device data",
+        "description": "Partial update for mobile-plant-operation device by deviceSn in body.[file:1]",
+        "operationId": "updateMobilePlantDevice",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MobilePlantDeviceUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Devices"],
+        "summary": "Device-003 Delete 4S IoT device data",
+        "description": "Delete by deviceSn and siteId in body.[file:1]",
+        "operationId": "deleteMobilePlantDevice",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeviceDeleteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          }
+        }
+      },
+      "get": {
+        "tags": ["Devices"],
+        "summary": "Device-004 Query 4S IoT devices (Solution Vendor-hosted)",
+        "description": "List mobile-plant-operation device records with pagination.[file:1]",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/category4S"
+          },
+          {
+            "$ref": "#/components/parameters/siteId"
+          },
+          {
+            "$ref": "#/components/parameters/supplierId"
+          },
+          {
+            "$ref": "#/components/parameters/deviceSn"
+          },
+          {
+            "$ref": "#/components/parameters/pageNum"
+          },
+          {
+            "$ref": "#/components/parameters/pageSize"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceListResponse"
+                }
+              }
+            }
           }
         }
       }
     }
   },
   "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
     "schemas": {
-      "MobilePlantOperationDevice": {
+      "MobilePlantDevice": {
         "type": "object",
-        "required": [
-          "category4S",
-          "siteId",
-          "supplierId",
-          "pushAt",
-          "deviceProperties",
-          "machineProperties"
-        ],
+        "required": ["category4S", "siteId", "supplierId", "pushAt", "deviceProperties", "machineProperties"],
         "properties": {
           "category4S": {
             "type": "string",
             "enum": ["mobile-plant-operation"],
-            "description": "Category 4S Type code for the device"
+            "example": "mobile-plant-operation",
+            "description": "Fixed 4S category.[file:1]"
           },
           "siteId": {
             "type": "string",
-            "description": "A unique Site ID defined by solution vendor as the key for corresponding site"
+            "example": "1693279120646",
+            "description": "Vendor-defined site key.[file:1]"
+          },
+          "cicSiteId": {
+            "type": "integer",
+            "example": 438493849,
+            "description": "CIC-standard site ID (optional).[file:1]"
           },
           "supplierId": {
             "type": "string",
-            "description": "A unique ID indicate the device's supplier"
+            "example": "438",
+            "description": "Device supplier ID.[file:1]"
           },
           "pushAt": {
             "type": "string",
             "format": "date-time",
-            "description": "Means the data push time (ISO 8601)"
+            "example": "2025-01-06T14:40:16+08:00",
+            "description": "ISO 8601 push timestamp.[file:1]"
           },
           "deviceProperties": {
             "type": "object",
-            "required": [
-              "deviceSn",
-              "deviceName"
-            ],
+            "required": ["deviceSn", "deviceName"],
             "properties": {
               "deviceSn": {
                 "type": "string",
-                "description": "Serial number of the device by solution vendor (e.g., SN123456)"
+                "example": "SN-8655078237",
+                "description": "Serial number of the device by solution vendor.[file:1]"
               },
               "deviceName": {
                 "type": "string",
-                "description": "Name of the device (e.g., Excavator 1)"
+                "example": "mobile-plant-operation-001",
+                "description": "Name of the device.[file:1]"
               }
             }
           },
           "machineProperties": {
             "type": "object",
-            "required": [
-              "machineId",
-              "machineType"
-            ],
+            "required": ["machineId", "machineType"],
             "properties": {
               "machineId": {
                 "type": "string",
-                "description": "Unique ID for the machine (e.g., M456)"
+                "example": "139209320",
+                "description": "Unique ID for the machine.[file:1]"
               },
               "machineType": {
                 "type": "string",
-                "description": "Type of mobile plant (e.g., Excavator)"
+                "example": "182",
+                "description": "Type of mobile plant (e.g., excavator).[file:1]"
               }
             }
           },
           "additionalProperties": {
             "type": "object",
             "properties": {
-              "cicSiteId": {
-                "type": "integer",
-                "format": "int64",
-                "minimum": 0,
-                "description": "A unique site ID provided by CIC"
-              },
               "streamUrl": {
                 "type": "string",
-                "pattern": "^(flv|rtsp|rtmp|hls|http.*|https.*)$",
-                "description": "URL for live streaming from the machine (flv/rtsp/rtmp/hls)"
+                "format": "uri",
+                "example": "https://example.com/stream.flv",
+                "description": "URL for live streaming from the machine (flv/rtsp/mphls).[file:1]"
               },
               "remark": {
                 "type": "string",
-                "description": "Additional notes about the operation (e.g., In use)"
+                "example": "this is a mobile-plant-operation",
+                "description": "Additional notes about the operation.[file:1]"
+              }
+            }
+          }
+        },
+        "description": "Full mobile-plant-operation device record for construction machinery (e.g., excavators with proximity sensors).[file:1]"
+      },
+      "MobilePlantDeviceUpdate": {
+        "type": "object",
+        "required": ["deviceSn"],
+        "properties": {
+          "deviceSn": {
+            "type": "string",
+            "example": "SN-8655078237",
+            "description": "Device serial number to update.[file:1]"
+          },
+          "deviceProperties": {
+            "$ref": "#/components/schemas/MobilePlantDevice/properties/deviceProperties"
+          },
+          "machineProperties": {
+            "$ref": "#/components/schemas/MobilePlantDevice/properties/machineProperties"
+          },
+          "additionalProperties": {
+            "$ref": "#/components/schemas/MobilePlantDevice/properties/additionalProperties"
+          }
+        },
+        "description": "Update request with deviceSn.[file:1]"
+      },
+      "DeviceDeleteRequest": {
+        "type": "object",
+        "required": ["deviceSn", "siteId"],
+        "properties": {
+          "deviceSn": {
+            "type": "string",
+            "example": "SN-8655078237"
+          },
+          "siteId": {
+            "type": "string",
+            "example": "1693279120646"
+          }
+        },
+        "description": "Delete request by deviceSn and siteId.[file:1]"
+      },
+      "ApiResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "example": 10000
+          },
+          "msg": {
+            "type": "string",
+            "example": "success"
+          },
+          "data": {
+            "$ref": "#/components/schemas/MobilePlantDevice"
+          }
+        }
+      },
+      "DeviceListResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "example": 10000
+          },
+          "msg": {
+            "type": "string",
+            "example": "success"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "list": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/MobilePlantDevice"
+                }
+              },
+              "totalCount": {
+                "type": "integer",
+                "example": 100
+              },
+              "pageSize": {
+                "type": "integer",
+                "example": 10
+              },
+              "pageNum": {
+                "type": "integer",
+                "example": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    "parameters": {
+      "category4S": {
+        "name": "category4S",
+        "in": "query",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "enum": ["mobile-plant-operation"]
+        },
+        "example": "mobile-plant-operation"
+      },
+      "siteId": {
+        "name": "siteId",
+        "in": "query",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "example": "1693279120646"
+      },
+      "supplierId": {
+        "name": "supplierId",
+        "in": "query",
+        "schema": {
+          "type": "string"
+        },
+        "example": "438"
+      },
+      "deviceSn": {
+        "name": "deviceSn",
+        "in": "query",
+        "schema": {
+          "type": "string"
+        },
+        "example": "SN-8655078237"
+      },
+      "pageNum": {
+        "name": "pageNum",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "default": 1
+        }
+      },
+      "pageSize": {
+        "name": "pageSize",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "default": 10,
+          "maximum": 200
+        }
+      }
+    },
+    "responses": {
+      "Success": {
+        "description": "Success",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer",
+                  "example": 10000
+                },
+                "msg": {
+                  "type": "string",
+                  "example": "success"
+                }
+              }
+            }
+          }
+        }
+      },
+      "BadRequest": {
+        "description": "Bad Request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer",
+                  "example": 10002
+                },
+                "msg": {
+                  "type": "string",
+                  "example": "missing parameters: siteId"
+                }
               }
             }
           }
