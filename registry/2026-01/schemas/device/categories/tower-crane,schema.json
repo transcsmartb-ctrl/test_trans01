@@ -1,0 +1,165 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Tower Crane Device API",
+    "description": "API for submitting tower-crane data",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://your-domain.com/api/v1"
+    }
+  ],
+  "paths": {
+    "/devices": {
+      "post": {
+        "summary": "Submit tower crane devices data",
+        "description": "POST an array of tower-crane objects",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/TowerCraneDevice"
+                }
+              },
+              "example": [
+                {
+                  "category4S": "tower-crane",
+                  "siteId": "1693279120646",
+                  "supplierId": "438",
+                  "cicSiteId": 438493849,
+                  "pushAt": "2025-01-06T14:40:16+08:00",
+                  "deviceProperties": {
+                    "deviceSn": "SN-8655078237",
+                    "deviceName": "tower-crane 001"
+                  },
+                  "machineProperties": {
+                    "machineId": "139209320",
+                    "machineType": "182"
+                  },
+                  "additionalProperties": {
+                    "remark": "this is a tower-crane",
+                    "streamUrl": "https://xxxx.flv"
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "TowerCraneDevice": {
+        "type": "object",
+        "required": [
+          "category4S",
+          "siteId",
+          "supplierId",
+          "pushAt",
+          "deviceProperties",
+          "machineProperties"
+        ],
+        "properties": {
+          "category4S": {
+            "type": "string",
+            "enum": ["tower-crane"],
+            "description": "Category 4S Type code for the device"
+          },
+          "siteId": {
+            "type": "string",
+            "description": "A unique Site ID defined by solution vendor as the key for corresponding site"
+          },
+          "supplierId": {
+            "type": "string",
+            "description": "A unique ID indicate the device's supplier"
+          },
+          "pushAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Means the data push time (ISO 8601)"
+          },
+          "deviceProperties": {
+            "type": "object",
+            "required": [
+              "deviceSn",
+              "deviceName"
+            ],
+            "properties": {
+              "deviceSn": {
+                "type": "string",
+                "description": "Serial number of the device by solution vendor (e.g., TC123456)"
+              },
+              "deviceName": {
+                "type": "string",
+                "description": "Name of the device (e.g., Main Tower Crane)"
+              }
+            }
+          },
+          "machineProperties": {
+            "type": "object",
+            "required": [
+              "machineId",
+              "machineType"
+            ],
+            "properties": {
+              "machineId": {
+                "type": "string",
+                "description": "Unique ID for the machine (e.g., M123)"
+              },
+              "machineType": {
+                "type": "string",
+                "description": "Type of crane (e.g., Hammerhead Tower Crane)"
+              }
+            }
+          },
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "cicSiteId": {
+                "type": "integer",
+                "format": "int64",
+                "minimum": 0,
+                "description": "A unique site ID provided by CIC"
+              },
+              "streamUrl": {
+                "type": "string",
+                "pattern": "^(flv|rtsp|rtmp|hls|http.*|https.*)$",
+                "description": "URL for live streaming from the machine (flv/rtsp/rtmp/hls)"
+              },
+              "remark": {
+                "type": "string",
+                "description": "Additional notes or remarks regarding the crane (e.g., In use)"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,134 @@
+
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Others Device API",
+    "description": "API for submitting other/miscellaneous devices data (category4S: 'others')",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://your-domain.com/api/v1"
+    }
+  ],
+  "paths": {
+    "/devices": {
+      "post": {
+        "summary": "Submit other devices data",
+        "description": "POST an array of miscellaneous 'others' category4S devices",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/OthersDevice"
+                }
+              },
+              "example": [
+                {
+                  "category4S": "others",
+                  "siteId": "1693279120646",
+                  "supplierId": "438",
+                  "pushAt": "2025-01-06T14:40:16+08:00",
+                  "deviceProperties": {
+                    "deviceSn": "SN-8655078237",
+                    "deviceName": "other device 001"
+                  },
+                  "additionalProperties": {
+                    "cicSiteId": 438493849
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "OthersDevice": {
+        "type": "object",
+        "required": [
+          "category4S",
+          "siteId",
+          "supplierId",
+          "pushAt",
+          "deviceProperties"
+        ],
+        "properties": {
+          "category4S": {
+            "type": "string",
+            "enum": ["others"],
+            "description": "Category 4S Type code for miscellaneous/other devices"
+          },
+          "siteId": {
+            "type": "string",
+            "description": "A unique Site ID defined by solution vendor as the key for corresponding site"
+          },
+          "supplierId": {
+            "type": "string",
+            "description": "A unique ID indicate the device's supplier"
+          },
+          "pushAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Means the data push time (ISO 8601)"
+          },
+          "deviceProperties": {
+            "type": "object",
+            "required": [
+              "deviceSn",
+              "deviceName"
+            ],
+            "properties": {
+              "deviceSn": {
+                "type": "string",
+                "description": "Serial number of the device by solution vendor (e.g., SN123456)"
+              },
+              "deviceName": {
+                "type": "string",
+                "description": "Name of the device (e.g., Other Monitor 1)"
+              }
+            }
+          },
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "cicSiteId": {
+                "type": "integer",
+                "format": "int64",
+                "minimum": 0,
+                "description": "A unique site ID provided by CIC"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      }
+    }
+  }
+}

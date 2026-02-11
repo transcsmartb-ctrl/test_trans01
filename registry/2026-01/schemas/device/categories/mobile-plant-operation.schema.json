@@ -1,0 +1,165 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Mobile Plant Operation Device API",
+    "description": "API for submitting mobile-plant-operation data",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://your-domain.com/api/v1"
+    }
+  ],
+  "paths": {
+    "/devices": {
+      "post": {
+        "summary": "Submit mobile plant operation devices data",
+        "description": "POST an array of mobile-plant-operation objects",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/MobilePlantOperationDevice"
+                }
+              },
+              "example": [
+                {
+                  "category4S": "mobile-plant-operation",
+                  "siteId": "1693279120646",
+                  "supplierId": "438",
+                  "pushAt": "2025-01-06T14:40:16+08:00",
+                  "deviceProperties": {
+                    "deviceSn": "SN-8655078237",
+                    "deviceName": "mobile-plant-operation 001"
+                  },
+                  "machineProperties": {
+                    "machineId": "139209320",
+                    "machineType": "182"
+                  },
+                  "additionalProperties": {
+                    "cicSiteId": 438493849,
+                    "remark": "this is a mobile-plant-operation",
+                    "streamUrl": "https://xxxx.flv"
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "MobilePlantOperationDevice": {
+        "type": "object",
+        "required": [
+          "category4S",
+          "siteId",
+          "supplierId",
+          "pushAt",
+          "deviceProperties",
+          "machineProperties"
+        ],
+        "properties": {
+          "category4S": {
+            "type": "string",
+            "enum": ["mobile-plant-operation"],
+            "description": "Category 4S Type code for the device"
+          },
+          "siteId": {
+            "type": "string",
+            "description": "A unique Site ID defined by solution vendor as the key for corresponding site"
+          },
+          "supplierId": {
+            "type": "string",
+            "description": "A unique ID indicate the device's supplier"
+          },
+          "pushAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Means the data push time (ISO 8601)"
+          },
+          "deviceProperties": {
+            "type": "object",
+            "required": [
+              "deviceSn",
+              "deviceName"
+            ],
+            "properties": {
+              "deviceSn": {
+                "type": "string",
+                "description": "Serial number of the device by solution vendor (e.g., SN123456)"
+              },
+              "deviceName": {
+                "type": "string",
+                "description": "Name of the device (e.g., Excavator 1)"
+              }
+            }
+          },
+          "machineProperties": {
+            "type": "object",
+            "required": [
+              "machineId",
+              "machineType"
+            ],
+            "properties": {
+              "machineId": {
+                "type": "string",
+                "description": "Unique ID for the machine (e.g., M456)"
+              },
+              "machineType": {
+                "type": "string",
+                "description": "Type of mobile plant (e.g., Excavator)"
+              }
+            }
+          },
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "cicSiteId": {
+                "type": "integer",
+                "format": "int64",
+                "minimum": 0,
+                "description": "A unique site ID provided by CIC"
+              },
+              "streamUrl": {
+                "type": "string",
+                "pattern": "^(flv|rtsp|rtmp|hls|http.*|https.*)$",
+                "description": "URL for live streaming from the machine (flv/rtsp/rtmp/hls)"
+              },
+              "remark": {
+                "type": "string",
+                "description": "Additional notes about the operation (e.g., In use)"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
