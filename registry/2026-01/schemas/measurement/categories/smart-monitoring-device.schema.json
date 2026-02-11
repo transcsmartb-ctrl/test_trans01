@@ -1,0 +1,187 @@
+
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Smart Monitoring Measurements API",
+    "description": "API for submitting smart-monitoring-device measurements",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://your-domain.com/api/v1"
+    }
+  ],
+  "paths": {
+    "/measurements": {
+      "post": {
+        "summary": "Submit smart-monitoring-device measurements",
+        "description": "POST measurement data array for smart-monitoring-device",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/SmartMonitoringMeasurement"
+                }
+              },
+              "example": [
+                {
+                  "category4S": "smart-monitoring-device",
+                  "siteId": "1693279120646",
+                  "supplierId": "438",
+                  "deviceSn": "ac0003a0550",
+                  "pushAt": "2025-01-06T10:30:00+08:00",
+                  "measurements": [
+                    {
+                      "metricType": "heartRate",
+                      "dataType": "number",
+                      "value": 120,
+                      "unit": "/min",
+                      "observedAt": "2025-01-06T10:30:00+08:00"
+                    },
+                    {
+                      "metricType": "bodyTemperature",
+                      "dataType": "number",
+                      "value": 37.2,
+                      "unit": "Cel",
+                      "observedAt": "2025-01-06T10:30:00+08:00"
+                    }
+                  ],
+                  "additionalMeasurements": [
+                    {
+                      "metricType": "systolic",
+                      "dataType": "number",
+                      "value": 120,
+                      "unit": "mmHg",
+                      "observedAt": "2025-01-06T10:30:00+08:00"
+                    }
+                  ],
+                  "additionalProperties": {
+                    "cicSiteId": 438493849,
+                    "imageUrl": "https://xxxx.jpeg",
+                    "zoneId": "4390490324",
+                    "coordinateSystem": "WGS-84"
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Measurement": {
+        "type": "object",
+        "required": [
+          "metricType",
+          "dataType",
+          "value",
+          "unit",
+          "observedAt"
+        ],
+        "properties": {
+          "metricType": {
+            "type": "string",
+            "description": "Type of measurement (e.g., heartRate)"
+          },
+          "dataType": {
+            "type": "string",
+            "enum": ["string", "number", "integer", "boolean", "object"],
+            "description": "Format of measurement value"
+          },
+          "value": {
+            "type": ["string", "number", "integer", "boolean", "object"],
+            "description": "Measurement value"
+          },
+          "unit": {
+            "type": "string",
+            "description": "Unit of measurement (e.g., bpm, %)"
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Observation time (ISO 8601)"
+          }
+        }
+      },
+      "SmartMonitoringMeasurement": {
+        "type": "object",
+        "required": [
+          "category4S",
+          "siteId",
+          "supplierId",
+          "deviceSn",
+          "pushAt",
+          "measurements"
+        ],
+        "properties": {
+          "category4S": {
+            "type": "string",
+            "enum": ["smart-monitoring-device"],
+            "description": "Category 4S measurement type"
+          },
+          "siteId": {
+            "type": "string"
+          },
+          "supplierId": {
+            "type": "string"
+          },
+          "deviceSn": {
+            "type": "string"
+          },
+          "pushAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "measurements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Measurement"
+            },
+            "description": "Primary measurements (e.g., heartRate, battery)"
+          },
+          "additionalMeasurements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Measurement"
+            },
+            "description": "Secondary measurements (Appendix F/G)"
+          },
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "cicSiteId": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "imageUrl": {
+                "type": "string",
+                "format": "uri",
+                "pattern": ".*\\.jpeg$"
+              },
+              "zoneId": {
+                "type": "string"
+              },
+              "coordinateSystem": {
+                "type": "string",
+                "enum": ["WGS-84", "HK1980"]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

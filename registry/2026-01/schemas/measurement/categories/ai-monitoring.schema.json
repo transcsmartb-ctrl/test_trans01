@@ -1,0 +1,157 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "AI Monitoring Measurements API",
+    "description": "API for submitting ai-monitoring measurements",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://your-domain.com/api/v1"
+    }
+  ],
+  "paths": {
+    "/measurements": {
+      "post": {
+        "summary": "Submit ai-monitoring measurements",
+        "description": "POST measurement data for ai-monitoring category4S",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/AIMonitoringMeasurement"
+                }
+              },
+              "example": [
+                {
+                  "category4S": "ai-monitoring",
+                  "siteId": "1693279120646",
+                  "supplierId": "438",
+                  "deviceSn": "ac0003a0550",
+                  "pushAt": "2025-01-06T10:30:00+08:00",
+                  "measurements": [
+                    {
+                      "metricType": "location",
+                      "dataType": "object",
+                      "value": {
+                        "longitude": "137.4554",
+                        "latitude": "28.7887"
+                      },
+                      "unit": "{lat, long}",
+                      "observedAt": "2025-01-06T10:30:00+08:00"
+                    },
+                    {
+                      "metricType": "workingStatus",
+                      "dataType": "boolean",
+                      "value": true,
+                      "unit": "",
+                      "observedAt": "2025-01-06T10:30:00+08:00"
+                    }
+                  ],
+                  "additionalProperties": {
+                    "cicSiteId": 438493849,
+                    "zoneId": "4390490324",
+                    "coordinateSystem": "WGS-84"
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Measurement": {
+        "type": "object",
+        "required": [
+          "metricType",
+          "dataType",
+          "value",
+          "unit",
+          "observedAt"
+        ],
+        "properties": {
+          "metricType": { "type": "string" },
+          "dataType": {
+            "type": "string",
+            "enum": ["string", "number", "integer", "boolean", "object"]
+          },
+          "value": {
+            "oneOf": [
+              { "type": "string" },
+              { "type": "number" },
+              { "type": "integer" },
+              { "type": "boolean" },
+              {
+                "type": "object",
+                "properties": {
+                  "longitude": { "type": "string" },
+                  "latitude": { "type": "string" }
+                },
+                "required": ["longitude", "latitude"]
+              }
+            ]
+          },
+          "unit": { "type": "string" },
+          "observedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "AIMonitoringMeasurement": {
+        "type": "object",
+        "required": [
+          "category4S",
+          "siteId",
+          "supplierId",
+          "deviceSn",
+          "pushAt",
+          "measurements"
+        ],
+        "properties": {
+          "category4S": {
+            "type": "string",
+            "enum": ["ai-monitoring"]
+          },
+          "siteId": { "type": "string" },
+          "supplierId": { "type": "string" },
+          "deviceSn": { "type": "string" },
+          "pushAt": { "type": "string", "format": "date-time" },
+          "measurements": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Measurement" },
+            "description": "Core: location, workingStatus, onlineStatus"
+          },
+          "additionalMeasurements": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Measurement" },
+            "description": "Extended AI metrics (Appendix F)"
+          },
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "cicSiteId": { "type": "integer", "minimum": 0 },
+              "zoneId": { "type": "string" },
+              "coordinateSystem": {
+                "type": "string",
+                "enum": ["WGS-84", "HK1980"]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
