@@ -1,53 +1,39 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "Lock-Key Device API",
-    "description": "API for submitting lock-key data",
-    "version": "1.0.0"
+    "title": "CIC SSSS Device APIs - Lock-Key Device",
+    "description": "APIs for adding/updating/querying lock-key device (e.g., smart locks for access control). From CIC SSSS API Framework v0.16 (Device-001/002/004). See Appendix B.[file:1]",
+    "version": "1.0.0",
+    "contact": {
+      "name": "CIC SSSS"
+    }
   },
   "servers": [
     {
-      "url": "https://your-domain.com/api/v1"
+      "url": "https://api.example.com/v1"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Devices",
+      "description": "IoT Device Management for 4S categories.[file:1]"
     }
   ],
   "paths": {
     "/devices": {
       "post": {
-        "summary": "Submit lock-key devices data",
-        "description": "POST an array of lock-key objects",
+        "tags": ["Devices"],
+        "summary": "Device-001 Add 4S IoT device data (CMP-hosted)",
+        "description": "Add new lock-key device record.[file:1]",
+        "operationId": "addLockKeyDevice",
+        "security": [{"bearerAuth": []}],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/LockKeyDevice"
-                }
-              },
-              "example": [
-                {
-                  "category4S": "lock-key",
-                  "siteId": "1693279120646",
-                  "supplierId": "438",
-                  "pushAt": "2025-01-06T14:40:16+08:00",
-                  "deviceProperties": {
-                    "deviceSn": "SN-8655078237",
-                    "deviceName": "lock-key 001",
-                    "lockType": 2,
-                    "blnState": 1,
-                    "locationType": 1
-                  },
-                  "additionalProperties": {
-                    "cicSiteId": 438493849,
-                    "remark": "this is a lock-key",
-                    "locationDesc": "the second floor",
-                    "locationUrl": "https://xxxx.jpeg",
-                    "planX": "15",
-                    "planY": "30"
-                  }
-                }
-              ]
+                "$ref": "#/components/schemas/LockKeyDevice"
+              }
             }
           }
         },
@@ -57,125 +43,388 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string",
-                      "example": "success"
-                    }
-                  }
+                  "$ref": "#/components/schemas/ApiResponse"
                 }
               }
             }
           },
           "400": {
-            "description": "Bad Request"
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      },
+      "patch": {
+        "tags": ["Devices"],
+        "summary": "Device-002 Update 4S IoT device data",
+        "description": "Partial update for lock-key device by deviceSn in body.[file:1]",
+        "operationId": "updateLockKeyDevice",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LockKeyDeviceUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Devices"],
+        "summary": "Device-003 Delete 4S IoT device data",
+        "description": "Delete by deviceSn and siteId in body.[file:1]",
+        "operationId": "deleteLockKeyDevice",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeviceDeleteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          }
+        }
+      },
+      "get": {
+        "tags": ["Devices"],
+        "summary": "Device-004 Query 4S IoT devices (Solution Vendor-hosted)",
+        "description": "List lock-key device records with pagination.[file:1]",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/category4S"
+          },
+          {
+            "$ref": "#/components/parameters/siteId"
+          },
+          {
+            "$ref": "#/components/parameters/supplierId"
+          },
+          {
+            "$ref": "#/components/parameters/deviceSn"
+          },
+          {
+            "$ref": "#/components/parameters/pageNum"
+          },
+          {
+            "$ref": "#/components/parameters/pageSize"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceListResponse"
+                }
+              }
+            }
           }
         }
       }
     }
   },
   "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
     "schemas": {
       "LockKeyDevice": {
         "type": "object",
-        "required": [
-          "category4S",
-          "siteId",
-          "supplierId",
-          "pushAt",
-          "deviceProperties"
-        ],
+        "required": ["category4S", "siteId", "supplierId", "pushAt", "deviceProperties"],
         "properties": {
           "category4S": {
             "type": "string",
             "enum": ["lock-key"],
-            "description": "Category 4S Type code for the device"
+            "example": "lock-key",
+            "description": "Fixed 4S category.[file:1]"
           },
           "siteId": {
             "type": "string",
-            "description": "A unique Site ID defined by solution vendor as the key for corresponding site"
+            "example": "1693279120646",
+            "description": "Vendor-defined site key.[file:1]"
+          },
+          "cicSiteId": {
+            "type": "integer",
+            "example": 438493849,
+            "description": "CIC-standard site ID (optional).[file:1]"
           },
           "supplierId": {
             "type": "string",
-            "description": "A unique ID indicate the device's supplier"
+            "example": "438",
+            "description": "Device supplier ID.[file:1]"
           },
           "pushAt": {
             "type": "string",
             "format": "date-time",
-            "description": "Means the data push time (ISO 8601)"
+            "example": "2025-01-06T14:40:16+08:00",
+            "description": "ISO 8601 push timestamp.[file:1]"
           },
           "deviceProperties": {
             "type": "object",
-            "required": [
-              "deviceSn",
-              "deviceName",
-              "lockType",
-              "blnState",
-              "locationType"
-            ],
+            "required": ["deviceSn", "deviceName", "lockType", "blnState", "locationType"],
             "properties": {
               "deviceSn": {
                 "type": "string",
-                "description": "Serial number of the device by solution vendor (e.g., SN123456)"
+                "example": "SN-8655078237",
+                "description": "Serial number of the device by solution vendor.[file:1]"
               },
               "deviceName": {
                 "type": "string",
-                "description": "Name of the device (e.g., Main Entrance Lock)"
+                "example": "lock-key-001",
+                "description": "Name of the device.[file:1]"
               },
               "lockType": {
                 "type": "integer",
-                "enum": [1, 2, 3, 4, 5],
-                "description": "1=WiFi Lock, 2=Bluetooth Lock, 3=4G Lock, 4=LoRa Lock, 5=Other Lock"
+                "description": "Lock Type: 1-WiFi Lock, 2-Bluetooth Lock, 3-4G Lock, 4-LoRa Lock, 5-Other.[file:1]",
+                "example": 2
               },
               "blnState": {
                 "type": "integer",
-                "enum": [1, 2, 3],
-                "description": "1=Binding in progress (normal use), 2=Disabled, 3=Idle (available)"
+                "description": "Binding state: 1-Binding in progress, 2-Disabled, 3-Idle.[file:1]",
+                "example": 1
               },
               "locationType": {
                 "type": "integer",
-                "enum": [1, 2],
-                "description": "1=GPS positioning (requires longitude/latitude), 2=Floor plan positioning (requires planX/planY)"
+                "description": "Positioning types: 1-GPS positioning, 2-Floor plan positioning.[file:1]",
+                "example": 1
               }
             }
           },
           "additionalProperties": {
             "type": "object",
             "properties": {
-              "cicSiteId": {
-                "type": "integer",
-                "format": "int64",
-                "minimum": 0,
-                "description": "A unique site ID provided by CIC"
-              },
               "locationUrl": {
                 "type": "string",
                 "format": "uri",
-                "description": "URL for the corresponding floor plan (e.g., http://example.com/floorplan)"
+                "example": "https://example.com/floorplan.jpg",
+                "description": "URL for the corresponding floor plan.[file:1]"
               },
               "planX": {
                 "type": "string",
-                "pattern": "^-?\\d+(\\.\\d+)?$",
-                "description": "X-axis coordinate for floor plan positioning (decimal format)"
+                "pattern": "^\\d+(\\.\\d+)?$",
+                "example": "15",
+                "description": "X-axis coordinate for floor plan positioning.[file:1]"
               },
               "planY": {
                 "type": "string",
-                "pattern": "^-?\\d+(\\.\\d+)?$",
-                "description": "Y-axis coordinate for floor plan positioning (decimal format)"
+                "pattern": "^\\d+(\\.\\d+)?$",
+                "example": "30",
+                "description": "Y-axis coordinate for floor plan positioning.[file:1]"
               },
               "planZ": {
                 "type": "string",
-                "pattern": "^-?\\d+(\\.\\d+)?$",
-                "description": "Z-axis coordinate for floor plan position/elevation (decimal format)"
+                "pattern": "^\\d+(\\.\\d+)?$",
+                "example": "5.2",
+                "description": "Z-axis coordinate for floor plan position (elevation).[file:1]"
               },
               "locationDesc": {
                 "type": "string",
-                "description": "Description of device location (e.g., East entrance)"
+                "example": "the second floor",
+                "description": "Description of device location.[file:1]"
               },
               "remark": {
                 "type": "string",
-                "description": "Additional notes about the lock (e.g., Requires maintenance)"
+                "example": "this is a lock-key",
+                "description": "Additional notes about the lock.[file:1]"
+              }
+            }
+          }
+        },
+        "description": "Full lock-key device record for smart access control (e.g., electronic locks for hazardous areas).[file:1]"
+      },
+      "LockKeyDeviceUpdate": {
+        "type": "object",
+        "required": ["deviceSn"],
+        "properties": {
+          "deviceSn": {
+            "type": "string",
+            "example": "SN-8655078237",
+            "description": "Device serial number to update.[file:1]"
+          },
+          "deviceProperties": {
+            "$ref": "#/components/schemas/LockKeyDevice/properties/deviceProperties"
+          },
+          "additionalProperties": {
+            "$ref": "#/components/schemas/LockKeyDevice/properties/additionalProperties"
+          }
+        },
+        "description": "Update request with deviceSn.[file:1]"
+      },
+      "DeviceDeleteRequest": {
+        "type": "object",
+        "required": ["deviceSn", "siteId"],
+        "properties": {
+          "deviceSn": {
+            "type": "string",
+            "example": "SN-8655078237"
+          },
+          "siteId": {
+            "type": "string",
+            "example": "1693279120646"
+          }
+        },
+        "description": "Delete request by deviceSn and siteId.[file:1]"
+      },
+      "ApiResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "example": 10000
+          },
+          "msg": {
+            "type": "string",
+            "example": "success"
+          },
+          "data": {
+            "$ref": "#/components/schemas/LockKeyDevice"
+          }
+        }
+      },
+      "DeviceListResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "example": 10000
+          },
+          "msg": {
+            "type": "string",
+            "example": "success"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "list": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/LockKeyDevice"
+                }
+              },
+              "totalCount": {
+                "type": "integer",
+                "example": 100
+              },
+              "pageSize": {
+                "type": "integer",
+                "example": 10
+              },
+              "pageNum": {
+                "type": "integer",
+                "example": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    "parameters": {
+      "category4S": {
+        "name": "category4S",
+        "in": "query",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "enum": ["lock-key"]
+        },
+        "example": "lock-key"
+      },
+      "siteId": {
+        "name": "siteId",
+        "in": "query",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "example": "1693279120646"
+      },
+      "supplierId": {
+        "name": "supplierId",
+        "in": "query",
+        "schema": {
+          "type": "string"
+        },
+        "example": "438"
+      },
+      "deviceSn": {
+        "name": "deviceSn",
+        "in": "query",
+        "schema": {
+          "type": "string"
+        },
+        "example": "SN-8655078237"
+      },
+      "pageNum": {
+        "name": "pageNum",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "default": 1
+        }
+      },
+      "pageSize": {
+        "name": "pageSize",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "default": 10,
+          "maximum": 200
+        }
+      }
+    },
+    "responses": {
+      "Success": {
+        "description": "Success",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer",
+                  "example": 10000
+                },
+                "msg": {
+                  "type": "string",
+                  "example": "success"
+                }
+              }
+            }
+          }
+        }
+      },
+      "BadRequest": {
+        "description": "Bad Request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer",
+                  "example": 10002
+                },
+                "msg": {
+                  "type": "string",
+                  "example": "missing parameters: siteId"
+                }
               }
             }
           }
