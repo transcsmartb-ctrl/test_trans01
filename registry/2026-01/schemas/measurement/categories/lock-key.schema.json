@@ -1,21 +1,32 @@
-
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "Lock-Key Measurements API",
-    "description": "API for submitting lock-key measurements (IoT lock status)",
-    "version": "1.0.0"
+    "title": "CIC SSSS Measurement APIs - Lock-Key",
+    "description": "APIs for pushing/querying lock-key measurements (Measurement-001/002). Smart lock events: access attempts, battery, damage. See Appendix D.[file:1]",
+    "version": "1.0.0",
+    "contact": {
+      "name": "CIC SSSS"
+    }
   },
   "servers": [
     {
-      "url": "https://your-domain.com/api/v1"
+      "url": "https://api.example.com/v1"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Measurements",
+      "description": "Continuous IoT measurement data push/query (CMP-hosted:001, Vendor-hosted:002).[file:1]"
     }
   ],
   "paths": {
     "/measurements": {
       "post": {
-        "summary": "Submit lock-key measurements",
-        "description": "POST lock status and battery/signal measurements",
+        "tags": ["Measurements"],
+        "summary": "Measurement-001 Push lock-key measurements (CMP-hosted)",
+        "description": "Push smart lock events and status (array format).[file:1]",
+        "operationId": "pushLockKeyMeasurements",
+        "security": [{"bearerAuth": []}],
         "requestBody": {
           "required": true,
           "content": {
@@ -25,137 +36,258 @@
                 "items": {
                   "$ref": "#/components/schemas/LockKeyMeasurement"
                 }
-              },
-              "example": [
-                {
-                  "category4S": "lock-key",
-                  "siteId": "1693279120646",
-                  "supplierId": "438",
-                  "deviceSn": "ac0003a0550",
-                  "pushAt": "2025-01-06T10:30:00+08:00",
-                  "measurements": [
-                    {
-                      "metricType": "signalStrength",
-                      "dataType": "number",
-                      "value": 80,
-                      "unit": "%",
-                      "observedAt": "2025-01-06T10:30:00+08:00"
-                    },
-                    {
-                      "metricType": "battery",
-                      "dataType": "number",
-                      "value": 90,
-                      "unit": "%",
-                      "observedAt": "2025-01-06T10:30:00+08:00"
-                    },
-                    {
-                      "metricType": "lockEvent",
-                      "dataType": "string",
-                      "value": "locked",
-                      "unit": "",
-                      "observedAt": "2025-01-06T10:30:00+08:00"
-                    },
-                    {
-                      "metricType": "onlineStatus",
-                      "dataType": "boolean",
-                      "value": true,
-                      "unit": "",
-                      "observedAt": "2025-01-06T10:30:00+08:00"
-                    }
-                  ],
-                  "additionalProperties": {
-                    "cicSiteId": 438493849
-                  }
-                }
-              ]
+              }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccessResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["Measurements"],
+        "summary": "Measurement-002 Query lock-key measurements (Solution Vendor-hosted)",
+        "description": "Paginated lock events with time range.[file:1]",
+        "parameters": [
+          {
+            "name": "category4S",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": ["lock-key"]
+            }
           },
-          "400": {
-            "description": "Bad Request"
+          {
+            "$ref": "#/components/parameters/siteId"
+          },
+          {
+            "$ref": "#/components/parameters/supplierId"
+          },
+          {
+            "$ref": "#/components/parameters/deviceSn"
+          },
+          {
+            "$ref": "#/components/parameters/startTime"
+          },
+          {
+            "$ref": "#/components/parameters/endTime"
+          },
+          {
+            "$ref": "#/components/parameters/pageNum"
+          },
+          {
+            "$ref": "#/components/parameters/pageSize"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeasurementListResponse"
+                }
+              }
+            }
           }
         }
       }
     }
   },
   "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
     "schemas": {
-      "Measurement": {
-        "type": "object",
-        "required": [
-          "metricType",
-          "dataType",
-          "value",
-          "unit",
-          "observedAt"
-        ],
-        "properties": {
-          "metricType": {
-            "type": "string",
-            "examples": ["signalStrength", "battery", "lockEvent"]
-          },
-          "dataType": {
-            "type": "string",
-            "enum": ["string", "number", "integer", "boolean", "object"]
-          },
-          "value": {
-            "oneOf": [
-              { "type": "string" },
-              { "type": "number" },
-              { "type": "integer" },
-              { "type": "boolean" },
-              {
-                "type": "object",
-                "properties": {
-                  "longitude": { "type": "string" },
-                  "latitude": { "type": "string" }
-                }
-              }
-            ]
-          },
-          "unit": { "type": "string" },
-          "observedAt": { "type": "string", "format": "date-time" }
-        }
-      },
       "LockKeyMeasurement": {
         "type": "object",
-        "required": [
-          "category4S",
-          "siteId",
-          "supplierId",
-          "deviceSn",
-          "pushAt",
-          "measurements"
-        ],
+        "required": ["category4S", "siteId", "supplierId", "deviceSn", "pushAt", "measurements"],
         "properties": {
           "category4S": {
             "type": "string",
-            "enum": ["lock-key"]
+            "const": "lock-key",
+            "description": "Fixed category.[file:1]"
           },
-          "siteId": { "type": "string" },
-          "supplierId": { "type": "string" },
-          "deviceSn": { "type": "string" },
-          "pushAt": { "type": "string", "format": "date-time" },
+          "siteId": {
+            "type": "string",
+            "example": "1693279120646"
+          },
+          "cicSiteId": {
+            "type": "integer",
+            "example": 438493849
+          },
+          "supplierId": {
+            "type": "string",
+            "example": "438"
+          },
+          "deviceSn": {
+            "type": "string",
+            "example": "LOCK-001"
+          },
+          "pushAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-01-06T14:40:16+08:00"
+          },
           "measurements": {
             "type": "array",
-            "items": { "$ref": "#/components/schemas/Measurement" },
-            "description": "Lock metrics: signalStrength, battery, lockEvent (locked/unlocked), onlineStatus"
+            "items": {
+              "$ref": "#/components/schemas/MeasurementItem"
+            }
           },
           "additionalMeasurements": {
             "type": "array",
-            "items": { "$ref": "#/components/schemas/Measurement" }
+            "items": {
+              "$ref": "#/components/schemas/MeasurementItem"
+            }
           },
           "additionalProperties": {
             "type": "object",
             "properties": {
-              "cicSiteId": { "type": "integer", "minimum": 0 }
+              "locationUrl": {
+                "type": "string",
+                "format": "uri"
+              },
+              "locationDesc": {
+                "type": "string",
+                "example": "Hazardous Area Entrance"
+              },
+              "planX": {"type": "number"},
+              "planY": {"type": "number"},
+              "planZ": {"type": "number"},
+              "spaceName": {
+                "type": "string",
+                "example": "Electrical Room"
+              }
+            }
+          }
+        },
+        "description": "Smart lock measurement record.[file:1]"
+      },
+      "MeasurementItem": {
+        "type": "object",
+        "required": ["metricType", "dataType", "value", "observedAt"],
+        "properties": {
+          "metricType": {
+            "type": "string",
+            "enum": ["accessAttempt", "accessGranted", "accessDenied", "batteryLevel", "lockStatus", "tamperDetection", "blnState", "onlineStatus"],
+            "example": "accessAttempt"
+          },
+          "dataType": {
+            "type": "string",
+            "enum": ["number", "integer", "string", "boolean"],
+            "example": "boolean"
+          },
+          "value": {
+            "oneOf": [
+              {"type": "number"},
+              {"type": "integer"},
+              {"type": "string"},
+              {"type": "boolean"}
+            ],
+            "example": true
+          },
+          "unit": {
+            "type": "string",
+            "example": "%"
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-01-06T14:40:10+08:00"
+          },
+          "userId": {
+            "type": "string",
+            "example": "USER-123"
+          },
+          "attemptType": {
+            "type": "string",
+            "enum": ["authorized", "unauthorized", "rfid", "app", "keypad"],
+            "example": "unauthorized"
+          }
+        }
+      },
+      "ApiSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "code": {"type": "integer", "example": 10000},
+          "msg": {"type": "string", "example": "success"},
+          "data": {"type": "null"}
+        }
+      },
+      "MeasurementListResponse": {
+        "type": "object",
+        "properties": {
+          "code": {"type": "integer", "example": 10000},
+          "msg": {"type": "string", "example": "success"},
+          "data": {
+            "type": "object",
+            "properties": {
+              "list": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/LockKeyMeasurement"
+                }
+              },
+              "totalCount": {"type": "integer"},
+              "pageNum": {"type": "integer"},
+              "pageSize": {"type": "integer"}
             }
           }
         }
+      }
+    },
+    "parameters": {
+      "siteId": {
+        "name": "siteId",
+        "in": "query",
+        "required": true,
+        "schema": {"type": "string"}
+      },
+      "supplierId": {
+        "name": "supplierId",
+        "in": "query",
+        "required": true,
+        "schema": {"type": "string"}
+      },
+      "deviceSn": {
+        "name": "deviceSn",
+        "in": "query",
+        "schema": {"type": "string"}
+      },
+      "startTime": {
+        "name": "startTime",
+        "in": "query",
+        "schema": {"type": "string", "format": "date-time"}
+      },
+      "endTime": {
+        "name": "endTime",
+        "in": "query",
+        "schema": {"type": "string", "format": "date-time"}
+      },
+      "pageNum": {
+        "name": "pageNum",
+        "in": "query",
+        "schema": {"type": "integer", "default": 1}
+      },
+      "pageSize": {
+        "name": "pageSize",
+        "in": "query",
+        "schema": {"type": "integer", "default": 10, "maximum": 1000}
       }
     }
   }
